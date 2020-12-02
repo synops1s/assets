@@ -1,11 +1,15 @@
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
 New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
 
-Start-Transcript -Path "C:\WVD\WVD.FSLogix.Install.log"
+Start-Transcript -Path "C:\WVD\WVD.FSLogix.Install.log" -Force
+
+$BasePath = "C:\Packages\FSLogix"
+$FSLogixFilePath = "$($BasePath)\x64\Release\FSLogixAppsSetup.exe"
 
 try {
+
+    Start-Process -FilePath $FSLogixFilePath -ArgumentList "/install", "/quiet", "/norestart" -NoNewWindow -Wait -ErrorAction Continue -Verbose
     
-    $ArgumentList = "/install", "/quiet", "/norestart"
-    Start-Process -FilePath "C:\Packages\FSLogix\x64\Release\FSLogixAppsSetup.exe" -ArgumentList $ArgumentList -Wait -ErrorAction Stop
     $Result = [System.Environment]::ExitCode
 }
 catch {

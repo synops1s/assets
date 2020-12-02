@@ -1,4 +1,7 @@
-Start-Transcript -Path "C:\WVD\WVD.Initialize.log"
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
+New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
+
+Start-Transcript -Path "C:\WVD\WVD.Initialize.log" -Force
 
 $ACL1 = [System.Security.AccessControl.FileSystemAccessRule]::new("NT AUTHORITY\SYSTEM","FullControl","ContainerInherit, Objectinherit","None","Allow")
 $ACL2 = [System.Security.AccessControl.FileSystemAccessRule]::new("BUILTIN\Administrators","FullControl","ContainerInherit, Objectinherit","None","Allow")

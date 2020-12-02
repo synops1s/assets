@@ -1,4 +1,7 @@
-Start-Transcript -Path "C:\WVD\WVD.FSLogix.Config.log"
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
+New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
+
+Start-Transcript -Path "C:\WVD\WVD.FSLogix.Config.log" -Force
 
 $FSLogixUNCPath = "\\pwnkaaweaccwvdsaprofile.file.core.windows.net\fslogixprofiles"
 
@@ -6,21 +9,19 @@ $FSLogixUNCPath = "\\pwnkaaweaccwvdsaprofile.file.core.windows.net\fslogixprofil
 Add-MpPreference -ExclusionPath $FSLogixUNCPath
 
 # Add FSLogix Settings
-New-Item -Path HKLM:\Software\FSLogix\ -Name Profiles -Force
-New-Item -Path HKLM:\Software\FSLogix\Profiles\ -Name Apps -Force
+New-Item -Path HKLM:\Software\FSLogix\ -Name Profiles -Force -Verbose
+New-Item -Path HKLM:\Software\FSLogix\Profiles\ -Name Apps -Force -Verbose
 
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "Enabled" -Type "Dword" -Value "1"
-New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VHDLocations" -Value $FSLogixUNCPath -PropertyType MultiString -Force
-
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "SizeInMBs" -Type "Dword" -Value "32768"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "IsDynamic" -Type "Dword" -Value "1"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VolumeType" -Type "Dword" -Value "vhdx"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryCount" -Type "Dword" -Value "12"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryInterval" -Type "Dword" -Value "5"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ProfileType" -Type "Dword" -Value "3"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ConcurrentUserSessions" -Type "Dword" -Value "1"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "RoamSearch" -Type "Dword" -Value "2" 
-
-New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles\Apps -Name "RoamSearch" -Type "Dword" -Value "2"
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "Enabled" -Value "1" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VHDLocations" -Value $FSLogixUNCPath -PropertyType MultiString -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "SizeInMBs" -Value "32768" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "IsDynamic" -Value "1" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VolumeType" -Value "vhdx" -PropertyType String -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryCount" -Value "12" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryInterval" -Value "5" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ProfileType" -Value "3" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ConcurrentUserSessions" -Value "1" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "RoamSearch" -Value "2"  -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles\Apps -Name "RoamSearch" -Value "2" -PropertyType DWord -Force -Verbose
 
 Stop-Transcript

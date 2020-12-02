@@ -1,4 +1,7 @@
-Start-Transcript -Path "C:\WVD\WVD.Aquarius.Config.log"
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
+New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
+
+Start-Transcript -Path "C:\WVD\WVD.Apps.Aquarius.Config.log" -Force
 
 $BasePath = "C:\WVD.Apps\Aquarius"
 New-Item -Path $BasePath -ItemType Directory -ErrorAction SilentlyContinue -Force
@@ -12,6 +15,6 @@ IF EXIST "C:\Program Files\Java\jdk-11.0.4\bin\java.exe" (
 
 "@
 
-$CmdAquarius | Set-Content -Path "$($BasePath)\Aquarius.cmd"
+$CmdAquarius | Set-Content -Path "$($BasePath)\Aquarius.cmd" -Force -Verbose
 
 Stop-Transcript
