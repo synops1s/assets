@@ -14,7 +14,7 @@ New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VHDLocations" -Val
 
 Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "SizeInMBs" -Type "Dword" -Value "32768"
 Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "IsDynamic" -Type "Dword" -Value "1"
-Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VolumeType" -Type "Dword" -Value "vhd"
+Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VolumeType" -Type "Dword" -Value "vhdx"
 Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryCount" -Type "Dword" -Value "12"
 Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryInterval" -Type "Dword" -Value "5"
 Set-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ProfileType" -Type "Dword" -Value "3"
