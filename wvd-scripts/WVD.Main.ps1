@@ -1,16 +1,29 @@
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
-New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
+Function Invoke-Script {
+    
+    param(
+        [String]$FileName,
+        [String]$BasePath
+    )
+
+    New-Item -Path "C:\WVD" -ItemType Directory -Force
+    $FilePath = Join-Path -Path $BasePath -ChildPath $FileName 
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($FilePath).ps1" -RedirectStandardError "C:\WVD\$($FilePath).RSE.log" -Wait -Verbose
+}
+
+
+New-Item -Path "C:\WVD" -ItemType Directory -Force
 
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.FSLogix.Unpack.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.FSLogix.Install.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.FSLogix.Config.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.OneDrive.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.Apps.Aquarius.Unpack.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.Apps.Aquarius.Install.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.Apps.Aquarius.Config.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.Registration.ps1" -NoNewWindow -Wait -Verbose 
-Start-Process -FilePath "powershell.exe" -ArgumentList "-File WVD.AccessControlLists.ps1" -NoNewWindow -Wait -Verbose 
+Invoke-Script -FileName "WVD.FSLogix.Unpack" -BasePath "."
+Invoke-Script -FileName "WVD.FSLogix.Install" -BasePath "."
+Invoke-Script -FileName "WVD.FSLogix.Config" -BasePath "."
+Invoke-Script -FileName "WVD.OneDrive" -BasePath "."
+Invoke-Script -FileName "WVD.AccessControlLists" -BasePath "."
+Invoke-Script -FileName "WVD.Registration" -BasePath "."
+
+Invoke-Script -FileName "WVD.Apps.Aquarius.Unpack" -BasePath "."
+Invoke-Script -FileName "WVD.Apps.Aquarius.Install" -BasePath "."
+Invoke-Script -FileName "WVD.Apps.Aquarius.Config" -BasePath "."
 
 Stop-Transcript

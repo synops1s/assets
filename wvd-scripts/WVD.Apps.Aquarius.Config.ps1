@@ -1,6 +1,4 @@
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force -Verbose
-New-Item -Path "C:\WVD" -ItemType Directory -ErrorAction SilentlyContinue -Force
-
+New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Apps.Aquarius.Config.log" -Force
 
 $BasePath = "C:\WVD.Apps\Aquarius"
