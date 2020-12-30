@@ -30,10 +30,10 @@ New-Item -Path "C:\WVD" -ItemType Directory -Force
 
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
-Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Config.ps1"
-Invoke-Script -FileName "WVD.Registration.ps1"
+Invoke-Script -FilePath "WVD.FSLogix.Unpack.ps1"
+Invoke-Script -FilePath "WVD.FSLogix.Install.ps1"
+Invoke-Script -FilePath "WVD.FSLogix.Config.ps1"
+Invoke-Script -FilePath "WVD.Registration.ps1"
 
 Invoke-Script -FilePath "WVD.Apps.ps1" -BasePath $BasePath
 
