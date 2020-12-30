@@ -14,7 +14,7 @@ Function Invoke-Script {
     $PSFilePath = Join-Path -Path $BasePath -ChildPath $FilePath 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
 
-    if($True -eq [System.IO.File]::Exists($PSFileName))
+    if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
         Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -BasePath $($BasePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
     }
