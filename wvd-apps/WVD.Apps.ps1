@@ -27,6 +27,6 @@ Invoke-Script -FilePath "Scripts\WVD.OneDrive.ps1" -BasePath $BasePath
 
 Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Unpack.ps1" -BasePath $BasePath
 Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Install.ps1" -BasePath $BasePath
-Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Config" -BasePath $BasePath
+Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Config.ps1" -BasePath $BasePath
 
 Stop-Transcript
