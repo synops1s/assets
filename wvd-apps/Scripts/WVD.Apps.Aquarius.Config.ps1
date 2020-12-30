@@ -15,4 +15,13 @@ IF EXIST "C:\Program Files\Java\jdk-11.0.4\bin\java.exe" (
 
 $CmdAquarius | Set-Content -Path "$($BasePath)\Aquarius.cmd" -Force -Verbose
 
+####
+
+$CmdEmacs = @"
+\\pnwnlota079\aquarius_519\sw_runtime\Aquarius_emacs.cmd
+
+"@
+
+$CmdEmacs | Set-Content -Path "$($BasePath)\Aquarius.Emacs.cmd" -Force -Verbose
+
 Stop-Transcript

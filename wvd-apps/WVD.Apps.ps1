@@ -19,13 +19,14 @@ Function Invoke-Script {
 
 New-Item -Path "C:\WVD" -ItemType Directory -Force
 
-Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
+Start-Transcript -Path "C:\WVD\WVD.Apps.log" -Force
 
-Invoke-Script -FileName "WVD.FSLogix.Unpack" -BasePath "."
-Invoke-Script -FileName "WVD.FSLogix.Install" -BasePath "."
-Invoke-Script -FileName "WVD.FSLogix.Config" -BasePath "."
-Invoke-Script -FileName "WVD.Registration" -BasePath "."
+# Invoke-Script -FilePath "Scripts\WVD.AccessControlLists" -BasePath $BasePath
 
-Invoke-Script -FilePath "WVD.Apps.ps1" -BasePath $BasePath
+Invoke-Script -FilePath "Scripts\WVD.OneDrive.ps1" -BasePath $BasePath
+
+Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Unpack.ps1" -BasePath $BasePath
+Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Install.ps1" -BasePath $BasePath
+Invoke-Script -FilePath "Scripts\WVD.Apps.Aquarius.Config" -BasePath $BasePath
 
 Stop-Transcript
