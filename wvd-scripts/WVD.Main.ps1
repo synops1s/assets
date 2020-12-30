@@ -6,7 +6,7 @@ Function Invoke-Script {
     
     param(
         [String]$FilePath,
-        [String]$BasePath
+        [String]$BasePath = "."
     )
 
     New-Item -Path "C:\WVD" -ItemType Directory -Force
