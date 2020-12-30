@@ -14,7 +14,14 @@ Function Invoke-Script {
     $PSFilePath = Join-Path -Path $BasePath -ChildPath $FilePath 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
 
-    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -BasePath $($BasePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+    if($True -eq [System.IO.File]::Exists($PSFileName))
+    {
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -BasePath $($BasePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+    }
+    else
+    {
+        Write-Information "File '$($PSFilePath)' does not exists"
+    }
 }
 
 New-Item -Path "C:\WVD" -ItemType Directory -Force

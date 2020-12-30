@@ -1,20 +1,18 @@
 param(
-    [String]$BasePath = "."
+    [String]$BasePath = (Get-Location).Path
 )
 
 Function Invoke-Script {
     
     param(
         [String]$FilePath,
-        [String]$BasePath = "."
+        [String]$BasePath = (Get-Location).Path
     )
 
     New-Item -Path "C:\WVD" -ItemType Directory -Force
 
     $PSFilePath = Join-Path -Path $BasePath -ChildPath $FilePath 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
-
-    Write-Host $PSFilePath
 
     if($True -eq [System.IO.File]::Exists($PSFileName))
     {
