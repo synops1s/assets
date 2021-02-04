@@ -1,22 +1,23 @@
 param(
-    [String]$BasePath = (Get-Location).Path
+    [String]$SharePath
 )
 
 Function Invoke-Script {
     
     param(
-        [String]$FilePath,
-        [String]$BasePath = (Get-Location).Path
+        [String]$FileName,
+        [String]$FilePath = (Get-Location).Path,
+        [String]$SharePath
     )
 
     New-Item -Path "C:\WVD" -ItemType Directory -Force
 
-    $PSFilePath = Join-Path -Path $BasePath -ChildPath $FilePath 
+    $PSFilePath = Join-Path -Path $FilePath -ChildPath $FileName 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
 
     if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -BasePath $($BasePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -FilePath $($FilePath) -SharePath $($SharePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
     }
     else
     {
@@ -28,11 +29,11 @@ New-Item -Path "C:\WVD" -ItemType Directory -Force
 
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
-Invoke-Script -FilePath "WVD.FSLogix.Unpack.ps1"
-Invoke-Script -FilePath "WVD.FSLogix.Install.ps1"
-Invoke-Script -FilePath "WVD.FSLogix.Config.ps1"
-Invoke-Script -FilePath "WVD.Registration.ps1"
+Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
+Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
+Invoke-Script -FileName "WVD.FSLogix.Config.ps1" -SharePath $SharePath
+Invoke-Script -FileName "WVD.Registration.ps1"
 
-Invoke-Script -FilePath "WVD.Apps.ps1" -BasePath $BasePath
+Invoke-Script -FileName "WVD.Apps.ps1" -FilePath (Join-Path -Path $SharePath -ChildPath "Apps")
 
 Stop-Transcript

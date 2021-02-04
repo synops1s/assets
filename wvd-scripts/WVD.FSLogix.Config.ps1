@@ -1,7 +1,11 @@
+param(
+    [String]$SharePath
+)
+
 New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.FSLogix.Config.log" -Force
 
-$FSLogixUNCPath = "\\pwnkaaweaccwvdsaprofile.file.core.windows.net\fslogixprofiles"
+$FSLogixUNCPath = Join-Path -Path $SharePath -ChildPath "fslogixprofiles" -Verbose
 
 # Microsoft Defender Exclusion for FSLogix
 Add-MpPreference -ExclusionPath $FSLogixUNCPath
