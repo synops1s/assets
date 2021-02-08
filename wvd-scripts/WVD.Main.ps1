@@ -1,5 +1,7 @@
 param(
-    [String]$SharePath
+    [String]$SharePath,
+    [String]$TenantId,
+    [String]$TenantName
 )
 
 Function Invoke-Script {
@@ -7,7 +9,9 @@ Function Invoke-Script {
     param(
         [String]$FileName,
         [String]$FilePath = (Get-Location).Path,
-        [String]$SharePath
+        [String]$SharePath,
+        [String]$TenantId,
+        [String]$TenantName
     )
 
     New-Item -Path "C:\WVD" -ItemType Directory -Force
@@ -17,7 +21,7 @@ Function Invoke-Script {
 
     if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -FilePath $($FilePath) -SharePath $($SharePath)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -FilePath $($FilePath) -SharePath $($SharePath) -TenantId $($TenantId) -TenantName $($TenantName)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
     }
     else
     {
@@ -26,12 +30,15 @@ Function Invoke-Script {
 }
 
 New-Item -Path "C:\WVD" -ItemType Directory -Force
-
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
+Invoke-Script -FileName "WVD.ACL.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Config.ps1" -SharePath $SharePath
+Invoke-Script -FileName "WVD.SSO.ps1"
+Invoke-Script -FileName "WVD.SSO.Office.ps1" -TenantId $TenantId
+Invoke-Script -FileName "WVD.DeviceRegistration.ps1" -TenantId $TenantId -TenantName $TenantName
 Invoke-Script -FileName "WVD.Registration.ps1"
 
 Invoke-Script -FileName "WVD.Apps.ps1" -FilePath (Join-Path -Path $SharePath -ChildPath "Apps")
