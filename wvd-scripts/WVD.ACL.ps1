@@ -18,6 +18,13 @@ $ACLWVD.SetAccessRuleProtection($true, $false)
 $ACLWVD.AddAccessRule($ACL1)
 $ACLWVD.AddAccessRule($ACL2)
 $ACLWVD | Set-Acl -Verbose
+
+$ACLPackages = Get-Acl -Path "C:\WindowsAzure"
+$ACLPackages.Access | ForEach-Object { $ACLPackages.RemoveAccessRule($_) }
+$ACLPackages.SetAccessRuleProtection($true, $false)
+$ACLPackages.AddAccessRule($ACL1)
+$ACLPackages.AddAccessRule($ACL2)
+$ACLPackages | Set-Acl -Verbose
 #endregion
 
 Stop-Transcript
