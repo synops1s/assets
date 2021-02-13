@@ -41,7 +41,7 @@ Invoke-Script -FileName "WVD.SSO.ps1"
 Invoke-Script -FileName "WVD.SSO.Office.ps1" -TenantId $TenantId
 Invoke-Script -FileName "WVD.DeviceRegistration.ps1" -TenantId $TenantId -TenantName $TenantName
 Invoke-Script -FileName "WVD.Registration.ps1"
-Invoke-Script -FileName "WVD.Tasks.Cleanup.Extensions.ps1"
+Invoke-Script -FileName "WVD.Tasks.CleanupExtensions.ps1"
 
 Invoke-Script -FileName "WVD.Apps.ps1" -FilePath (Join-Path -Path $SharePath -ChildPath "Apps")
 
