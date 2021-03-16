@@ -34,6 +34,7 @@ New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
 Invoke-Script -FileName "WVD.ACL.ps1"
+Invoke-Script -FileName "WVD.Defender.ps1" -SharePath $SharePath
 Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Config.ps1" -SharePath $SharePath

@@ -7,9 +7,6 @@ Start-Transcript -Path "C:\WVD\WVD.FSLogix.Config.log" -Force
 
 $FSLogixUNCPath = Join-Path -Path $SharePath -ChildPath "fslogixprofiles" -Verbose
 
-# Microsoft Defender Exclusion for FSLogix
-Add-MpPreference -ExclusionPath $FSLogixUNCPath
-
 # Add FSLogix Settings
 New-Item -Path HKLM:\Software\FSLogix\ -Name Profiles -Force -Verbose
 New-Item -Path HKLM:\Software\FSLogix\Profiles\ -Name Apps -Force -Verbose
@@ -23,7 +20,8 @@ New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryCount" 
 New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "LockedRetryInterval" -Value "5" -PropertyType DWord -Force -Verbose
 New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ProfileType" -Value "3" -PropertyType DWord -Force -Verbose
 New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "ConcurrentUserSessions" -Value "1" -PropertyType DWord -Force -Verbose
-New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "RoamSearch" -Value "2"  -PropertyType DWord -Force -Verbose
-New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles\Apps -Name "RoamSearch" -Value "2" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "RoamSearch" -Value "0"  -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\FSLogix\Apps -Name "RoamSearch" -Value "0" -PropertyType DWord -Force -Verbose
+New-ItemProperty -Path HKLM:\Software\Policies\FSLogix\ODFC -Name "RoamSearch" -Value "0"  -PropertyType DWord -Force -Verbose
 
 Stop-Transcript
