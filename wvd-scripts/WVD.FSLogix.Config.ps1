@@ -8,8 +8,9 @@ Start-Transcript -Path "C:\WVD\WVD.FSLogix.Config.log" -Force
 $FSLogixUNCPath = Join-Path -Path $SharePath -ChildPath "fslogixprofiles" -Verbose
 
 # Add FSLogix Settings
-New-Item -Path HKLM:\Software\FSLogix\ -Name Profiles -Force -Verbose
-New-Item -Path HKLM:\Software\FSLogix\Profiles\ -Name Apps -Force -Verbose
+New-Item -Path HKLM:\Software\FSLogix -Name Profiles -Force -Verbose
+New-Item -Path HKLM:\Software\FSLogix -Name Apps -Force -Verbose
+New-Item -Path HKLM:\Software\Policies\FSLogix -Name ODFC -Force -Verbose
 
 New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "Enabled" -Value "1" -PropertyType DWord -Force -Verbose
 New-ItemProperty -Path HKLM:\Software\FSLogix\Profiles -Name "VHDLocations" -Value $FSLogixUNCPath -PropertyType MultiString -Force -Verbose

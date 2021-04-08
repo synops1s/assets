@@ -46,6 +46,8 @@ Invoke-Script -FileName "WVD.Tasks.CleanupExtensions.ps1"
 
 Invoke-Script -FileName "WVD.Apps.ps1" -FilePath (Join-Path -Path $SharePath -ChildPath "Apps")
 
+Set-TimeZone -Name "W. Europe Standard Time" -Verbose
+
 Start-ScheduledTask -TaskName "WVD-Cleanup-Extensions" -TaskPath "WVD" -Verbose
 
 Stop-Transcript
