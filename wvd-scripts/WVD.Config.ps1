@@ -23,10 +23,11 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathFSLogixProfil
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathMSIX" -Value $MSIXAppAttachUNCPath -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathApps" -Value $AppsUNCPath -PropertyType String -Force -Verbose
 
+New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "DomainUserGroup" -Value "DLG_SEC_WVD_Users" -PropertyType String -Force -Verbose
+
 # Max Disconnection Time: 4 hours
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration" -Name "MaxDisconnectionTime" -Value 14400000 -PropertyType DWord -Force -Verbose
 # Max Idle Time: 4 hours
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration" -Name "MaxIdleTime" -Value 14400000 -PropertyType DWord -Force -Verbose
-
 
 Stop-Transcript
