@@ -4,6 +4,7 @@ $Task = @"
 Start-Transcript -Path "C:\WVD\Tasks\WVD.Tasks.Cleanup.log" -Force
 
 Start-Sleep -Seconds 30 -Verbose
+
 Remove-Item -Path "C:\Packages\Plugins\*\*\Downloads\*" -Recurse
 
 Stop-Transcript
