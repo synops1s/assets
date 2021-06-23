@@ -30,6 +30,7 @@ Function Invoke-Script {
     }
 }
 
+
 New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
@@ -44,9 +45,8 @@ Invoke-Script -FileName "WVD.SSO.Office.ps1" -TenantId $TenantId
 Invoke-Script -FileName "WVD.DeviceRegistration.ps1" -TenantId $TenantId -TenantName $TenantName
 Invoke-Script -FileName "WVD.Registration.ps1"
 Invoke-Script -FileName "WVD.Tasks.DeviceRegistration.ps1"
+Invoke-Script -FileName "WVD.Apps.ps1"
 Invoke-Script -FileName "WVD.Tasks.Cleanup.ps1"
-
-Invoke-Script -FileName "WVD.Apps.ps1" -FilePath (Join-Path -Path $SharePath -ChildPath "Apps")
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
