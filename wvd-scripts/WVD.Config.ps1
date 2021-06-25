@@ -1,7 +1,8 @@
 param(
     [String]$SharePath,
     [String]$TenantId,
-    [String]$TenantName
+    [String]$TenantName,
+    [String]$TenantDirectory
 )
 
 New-Item -Path "C:\WVD" -ItemType Directory -Force
@@ -11,13 +12,17 @@ $FSLogixUNCPath = Join-Path -Path $SharePath -ChildPath "fslogixprofiles" -Verbo
 $MSIXAppAttachUNCPath = Join-Path -Path $SharePath -ChildPath "msixappattach" -Verbose
 $AppsUNCPath = Join-Path -Path $SharePath -ChildPath "apps" -Verbose
 
-New-Item -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Force
+If($false -eq (Test-Path -Path "HKLM:\SOFTWARE\Fujitsu\WVD")) {
+
+    New-Item -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Force
+}
 
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "MajorVersion" -Value 2 -PropertyType DWord -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "MinorVersion" -Value 0 -PropertyType DWord -Force -Verbose
 
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "TenantId" -Value $TenantId -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "TenantName" -Value $TenantName -PropertyType String -Force -Verbose
+New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "TenantDirectory" -Value $TenantDirectory -PropertyType String -Force -Verbose
 
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathFSLogixProfiles" -Value $FSLogixUNCPath -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathMSIX" -Value $MSIXAppAttachUNCPath -PropertyType String -Force -Verbose

@@ -1,7 +1,9 @@
 param(
     [String]$SharePath,
     [String]$TenantId,
-    [String]$TenantName
+    [String]$TenantName,
+    [String]$TenantDirectory,
+    [String]$RSAParameters
 )
 
 Function Invoke-Script {
@@ -11,7 +13,9 @@ Function Invoke-Script {
         [String]$FilePath = (Get-Location).Path,
         [String]$SharePath,
         [String]$TenantId,
-        [String]$TenantName
+        [String]$TenantName,
+        [String]$TenantDirectory,
+        [String]$RSAParameters
     )
 
     New-Item -Path "C:\WVD" -ItemType Directory -Force
@@ -22,7 +26,7 @@ Function Invoke-Script {
 
     if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File $($PSFilePath) -FilePath $($FilePath) -SharePath $($SharePath) -TenantId $($TenantId) -TenantName $($TenantName)" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`" -FilePath `"$($FilePath)`" -SharePath `"$($SharePath)`" -TenantId `"$($TenantId)`" -TenantName `"$($TenantName)`" -TenantDirectory `"$($TenantDirectory)`" -RSAParameters `"$($RSAParameters)`"" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
     }
     else
     {
@@ -30,12 +34,12 @@ Function Invoke-Script {
     }
 }
 
-
 New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
 Invoke-Script -FileName "WVD.ACL.ps1"
-Invoke-Script -FileName "WVD.Config.ps1" -SharePath $SharePath -TenantId $TenantId -TenantName $TenantName
+Invoke-Script -FileName "WVD.Config.ps1" -SharePath $SharePath -TenantId $TenantId -TenantName $TenantName -TenantDirectory $TenantDirectory
+Invoke-Script -FileName "WVD.RSA.ps1" -RSAParameters $RSAParameters
 Invoke-Script -FileName "WVD.Defender.ps1" -SharePath $SharePath
 Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
