@@ -13,7 +13,7 @@ Function Get-WVDDecryptedKey
         $KeyName
     )
 
-    Get-DecryptedKey -KeyValue (Get-ItemPropertyValue -Path "HKLM:SOFTWARE\Fujitsu\WVD" -Name $KeyName -ErrorAction Stop)
+    Get-DecryptedKey -KeyValue (Get-ItemPropertyValue -Path "HKLM:SOFTWARE\Fujitsu\WVD\Secrets" -Name $KeyName -ErrorAction Stop)
 }
 
 Function Get-DecryptedKey
@@ -26,7 +26,7 @@ Function Get-DecryptedKey
 
     ###### CSP Parameters #######
     $CspParameters = New-Object System.Security.Cryptography.CspParameters
-    $CspParameters.KeyContainerName = "WVD.Crypto"
+    $CspParameters.KeyContainerName = "WVD.RSA"
     $CspParameters.Flags = $CspParameters.Flags -bor [System.Security.Cryptography.CspProviderFlags]::UseMachineKeyStore
     $CspParameters.Flags = $CspParameters.Flags -bor [System.Security.Cryptography.CspProviderFlags]::UseNonExportableKey
 
