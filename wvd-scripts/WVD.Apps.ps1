@@ -107,9 +107,12 @@ If($false -eq (Test-Path -Path $AppsConfigFile)) {
     return
 }
 
-$Apps = Get-Content -Path $AppsConfigFile -Raw | ConvertFrom-Json -AsHashtable
-    
-$HostPool = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\RDMonitoringAgent" -ErrorAction SilentlyContinue).SessionHostPool
+$Apps = @{}
+
+$AppsConfig = Get-Content -Path $AppsConfigFile -Raw | ConvertFrom-Json
+$AppsConfig.psobject.Properties | ForEach-Object { $Apps[$_.Name] = $_.Value }
+ 
+$HostPool = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName"
     
 If([System.String]::IsNullOrEmpty($HostPool)) {
 

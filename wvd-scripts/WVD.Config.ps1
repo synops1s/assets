@@ -2,7 +2,8 @@ param(
     [String]$SharePath,
     [String]$TenantId,
     [String]$TenantName,
-    [String]$TenantDirectory
+    [String]$TenantDirectory,
+    [String]$HostPoolName
 )
 
 Start-Transcript -Path "C:\WVD\WVD.Config.log" -Force
@@ -25,6 +26,8 @@ New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "MinorVersion" -Value 0 -Prope
 New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantId" -Value $TenantId -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantName" -Value $TenantName -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantDirectory" -Value $TenantDirectory -PropertyType String -Force -Verbose
+
+New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName" -Value $HostPoolName -PropertyType String -Force -Verbose
 
 New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathFSLogixProfiles" -Value $FSLogixUNCPath -PropertyType String -Force -Verbose
 New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathMSIX" -Value $MSIXAppAttachUNCPath -PropertyType String -Force -Verbose
