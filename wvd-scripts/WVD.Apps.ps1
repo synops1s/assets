@@ -87,11 +87,11 @@ Function Unprotect-WVDSecret
 
 Write-Host -Message "ComputerName = $($env:COMPUTERNAME)"
 
-$AESKey = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($AESKey)))
+$AESKeyDS = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($AESKey)))
 
 $AES = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
 
-$AES.Key = $AESKey
+$AES.Key = $AESKeyDS
 $AES.IV = Get-WVDAESIVFromRegistry
 
 $Credential = [PSCredential]::new((Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret2") -Force))
