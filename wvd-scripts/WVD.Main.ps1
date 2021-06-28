@@ -6,6 +6,8 @@ param(
     [String]$AESKey
 )
 
+Add-Type -AssemblyName System.Web
+
 Function Invoke-Script {
     
     param(
@@ -49,7 +51,7 @@ Invoke-Script -FileName "WVD.DeviceRegistration.ps1" -TenantId $TenantId -Tenant
 Invoke-Script -FileName "WVD.Tasks.DeviceRegistration.ps1"
 Invoke-Script -FileName "WVD.Tasks.Cleanup.ps1"
 Invoke-Script -FileName "WVD.Registration.ps1"
-Invoke-Script -FileName "WVD.Apps.ps1" -AESKey $AESKey
+Invoke-Script -FileName "WVD.Apps.ps1" -AESKey ([System.Web.HttpUtility]::UrlDecode($AESKey))
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
