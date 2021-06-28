@@ -1,4 +1,3 @@
-New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.SSO.log" -Force
 
 if($False -eq (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\microsoftazuread-sso.com\autologon"))

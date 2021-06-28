@@ -5,7 +5,10 @@ Start-Transcript -Path "C:\WVD\Tasks\WVD.Tasks.Cleanup.log" -Force
 
 Start-Sleep -Seconds 30 -Verbose
 
-Remove-Item -Path "C:\Packages\Plugins\*\*\Downloads\*" -Recurse
+Remove-Item -Path "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\*\Downloads\*" -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\*\*.log" -Recurse -ErrorAction SilentlyContinue
+
+Get-Item -Path "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\*\Status\*" -ErrorAction SilentlyContinue | Sort-Object -Property LastWriteTime | Select-Object -SkipLast 1 | Remove-Item
 
 Stop-Transcript
 "@

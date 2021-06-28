@@ -1,4 +1,3 @@
-New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.FSLogix.Install.log" -Force
 
 $BasePath = "C:\Packages\FSLogix"

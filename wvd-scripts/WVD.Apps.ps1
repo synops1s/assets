@@ -1,52 +1,102 @@
-New-Item -Path "C:\WVD" -ItemType Directory -Force
+param(
+    [String]$AESKey
+)
+
 Start-Transcript -Path "C:\WVD\WVD.Apps.log" -Force
 
 $AppsConfigFile = "X:\WVD.Apps.json"
 
 $ErrorActionPreference = "Stop"
 
-Function Get-WVDDecryptedKey
+Function Get-WVDAESIVFromRegistry
 {
     param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [String]
-        $KeyName
+        $Path = "HKLM:\SOFTWARE\WVD\Configuration",
+
+        [Parameter(Mandatory=$false)]
+        [String]
+        $Name = "IV"
     )
 
-    Get-DecryptedKey -KeyValue (Get-ItemPropertyValue -Path "HKLM:SOFTWARE\Fujitsu\WVD\Secrets" -Name $KeyName -ErrorAction Stop)
+    $AESIV = Get-ItemPropertyValue -Path $Path -Name $Name -ErrorAction Stop
+    [System.Convert]::FromBase64String($AESIV)
 }
 
-Function Get-DecryptedKey
+Function Unprotect-WVDAESString {
+
+    param (
+
+        [Parameter(Mandatory=$true, ParameterSetName = "EncryptedBytes")]
+        [Parameter(ParameterSetName = "Base64")]
+        [ValidateNotNull()]
+        [System.Security.Cryptography.AesCryptoServiceProvider]
+        $AesCryptoServiceProvider,
+
+        [Parameter(Mandatory=$false, ParameterSetName = "EncryptedBytes")]
+        [ValidateNotNull()]
+        [System.Byte[]]
+        $EncryptedBytes,
+
+        [Parameter(Mandatory=$true, ParameterSetName = "Base64")]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Base64String,
+
+        [Parameter(Mandatory=$true, ParameterSetName = "Base64")]
+        [switch]
+        $FromBase64
+    )
+
+    $Decryptor = $AesCryptoServiceProvider.CreateDecryptor()
+
+    If($FromBase64.IsPresent) {
+
+        $EB = [System.Convert]::FromBase64String($Base64String)
+        $UB = $Decryptor.TransformFinalBlock($EB, 0, $EB.Length)
+        
+    }
+    else {
+        
+        $UB = $Decryptor.TransformFinalBlock($EncryptedBytes, 0, $EncryptedBytes.Length)
+    }
+
+    [System.Text.Encoding]::UTF8.GetString($UB)
+}
+
+Function Unprotect-WVDSecret
 {
     param (
         [Parameter(Mandatory=$true)]
+        [ValidateNotNull()]
+        [System.Security.Cryptography.AesCryptoServiceProvider]
+        $AesCryptoServiceProvider,
+
+        [Parameter(Mandatory=$false)]
         [String]
-        $KeyValue
+        $Path = "HKLM:\SOFTWARE\WVD\Configuration",
+
+        [Parameter(Mandatory=$true)]
+        [String]
+        $Name
     )
 
-    ###### CSP Parameters #######
-    $CspParameters = New-Object System.Security.Cryptography.CspParameters
-    $CspParameters.KeyContainerName = "WVD.RSA"
-    $CspParameters.Flags = $CspParameters.Flags -bor [System.Security.Cryptography.CspProviderFlags]::UseMachineKeyStore
-    $CspParameters.Flags = $CspParameters.Flags -bor [System.Security.Cryptography.CspProviderFlags]::UseNonExportableKey
-
-    ####### Open Key from Machine CSP #######
-    $RSA = [System.Security.Cryptography.RSACryptoServiceProvider]::new($CspParameters)
-
-    ####### Decrypt #######
-    $EncryptedBytes = [System.Convert]::FromBase64String($KeyValue)
-    
-    try {
-        [System.Text.Encoding]::Unicode.GetString($RSA.Decrypt($EncryptedBytes, $true))
-    }
-    catch {}  
+    Unprotect-WVDAESString -AesCryptoServiceProvider $AesCryptoServiceProvider -Base64String (Get-ItemPropertyValue -Path $Path -Name $Name -ErrorAction Stop) -FromBase64
 }
 
 Write-Host -Message "ComputerName = $($env:COMPUTERNAME)"
 
-$Credential = [PSCredential]::new((Get-WVDDecryptedKey -KeyName "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Get-WVDDecryptedKey -KeyName "FilePathAppsSecret2") -Force))
+$AESKey = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($AESKey)))
 
-$FilePathApps = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Fujitsu\WVD" -Name "FilePathApps"
+$AES = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
+
+$AES.Key = $AESKey
+$AES.IV = Get-WVDAESIVFromRegistry
+
+$Credential = [PSCredential]::new((Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret2") -Force))
+
+$FilePathApps = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathApps"
 
 Remove-SmbMapping -RemotePath $FilePathApps -ErrorAction SilentlyContinue -Force
 New-PSDrive -Name "X" -PSProvider FileSystem -Root $FilePathApps -Credential $Credential

@@ -1,30 +1,50 @@
-New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.ACL.log" -Force
 
 $ACL1 = [System.Security.AccessControl.FileSystemAccessRule]::new("NT AUTHORITY\SYSTEM","FullControl","ContainerInherit, Objectinherit","None","Allow")
 $ACL2 = [System.Security.AccessControl.FileSystemAccessRule]::new("BUILTIN\Administrators","FullControl","ContainerInherit, Objectinherit","None","Allow")
+$ACL3 = [System.Security.AccessControl.FileSystemAccessRule]::new("BUILTIN\Users","ReadAndExecute, Synchronize","ContainerInherit, Objectinherit","None","Allow")
 
 #region Set ACL Rules
-$ACLPackages = Get-Acl -Path "C:\Packages"
-$ACLPackages.Access | ForEach-Object { $ACLPackages.RemoveAccessRule($_) }
-$ACLPackages.SetAccessRuleProtection($true, $false)
-$ACLPackages.AddAccessRule($ACL1)
-$ACLPackages.AddAccessRule($ACL2)
-$ACLPackages | Set-Acl -Verbose
+$ACL = $null
+$ACL = Get-Acl -Path "C:\Packages"
+$ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
+$ACL.SetAccessRuleProtection($true, $false)
+$ACL.AddAccessRule($ACL1)
+$ACL.AddAccessRule($ACL2)
+$ACL | Set-Acl -Verbose
 
-$ACLWVD = Get-Acl -Path "C:\WVD"
-$ACLWVD.Access | ForEach-Object { $ACLWVD.RemoveAccessRule($_) }
-$ACLWVD.SetAccessRuleProtection($true, $false)
-$ACLWVD.AddAccessRule($ACL1)
-$ACLWVD.AddAccessRule($ACL2)
-$ACLWVD | Set-Acl -Verbose
+$ACL = $null
+$ACL = Get-Acl -Path "C:\WVD"
+$ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
+$ACL.SetAccessRuleProtection($true, $false)
+$ACL.AddAccessRule($ACL1)
+$ACL.AddAccessRule($ACL2)
+$ACL | Set-Acl -Verbose
 
-$ACLPackages = Get-Acl -Path "C:\WindowsAzure"
-$ACLPackages.Access | ForEach-Object { $ACLPackages.RemoveAccessRule($_) }
-$ACLPackages.SetAccessRuleProtection($true, $false)
-$ACLPackages.AddAccessRule($ACL1)
-$ACLPackages.AddAccessRule($ACL2)
-$ACLPackages | Set-Acl -Verbose
+$ACL = $null
+$ACL = Get-Acl -Path "C:\WVD.Apps"
+$ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
+$ACL.SetAccessRuleProtection($true, $false)
+$ACL.AddAccessRule($ACL1)
+$ACL.AddAccessRule($ACL2)
+$ACL.AddAccessRule($ACL3)
+$ACL | Set-Acl -Verbose
+
+$ACL = $null
+$ACL = Get-Acl -Path "C:\WVD.Repository"
+$ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
+$ACL.SetAccessRuleProtection($true, $false)
+$ACL.AddAccessRule($ACL1)
+$ACL.AddAccessRule($ACL2)
+$ACL | Set-Acl -Verbose
+
+$ACL = $null
+$ACL = Get-Acl -Path "C:\WindowsAzure"
+$ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
+$ACL.SetAccessRuleProtection($true, $false)
+$ACL.AddAccessRule($ACL1)
+$ACL.AddAccessRule($ACL2)
+$ACL | Set-Acl -Verbose
 #endregion
 
 Stop-Transcript

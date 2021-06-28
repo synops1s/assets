@@ -1,4 +1,3 @@
-New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Registration.log" -Force
 
 $AgentFileName = "Microsoft.RDInfra.RDAgent.msi"

@@ -3,7 +3,6 @@ param(
     [String]$TenantName
 )
 
-New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.DeviceRegistration.log" -Force
 
 New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin" -Name "BlockAADWorkplaceJoin" -Value 1 -PropertyType DWord -Force -Verbose
