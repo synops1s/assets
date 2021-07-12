@@ -17,9 +17,6 @@ Function Invoke-Script {
         [String]$AESKey
     )
 
-    New-Item -Path "C:\WVD" -ItemType Directory -Force
-    New-Item -Path "C:\WindowsAzure" -ItemType Directory -Force
-
     $PSFilePath = Join-Path -Path $FilePath -ChildPath $FileName 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
 
