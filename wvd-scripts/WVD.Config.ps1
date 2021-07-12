@@ -1,43 +1,20 @@
 param(
-    [String]$SharePath,
-    [String]$TenantId,
-    [String]$TenantName,
-    [String]$TenantDirectory,
-    [String]$HostPoolName
+    [String]$RegistryItemProperties
 )
 
-Start-Transcript -Path "C:\WVD\WVD.Config.log" -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Config.log") -Force
 
-New-Item -Path "C:\WVD.Apps" -ItemType Directory -Force
-New-Item -Path "C:\WVD.Repository" -ItemType Directory -Force
+$RegistryItemProperties = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($RegistryItemProperties)))
 
-$FSLogixUNCPath = Join-Path -Path $SharePath -ChildPath "fslogixprofiles" -Verbose
-$MSIXAppAttachUNCPath = Join-Path -Path $SharePath -ChildPath "msixappattach" -Verbose
-$AppsUNCPath = Join-Path -Path $SharePath -ChildPath "apps" -Verbose
+$RegistryItemProperties | ForEach-Object {
 
-If($false -eq (Test-Path -Path "HKLM:\SOFTWARE\WVD")) {
+    If($false -eq (Test-Path -Path $_.Path)) {
 
-    New-Item -Path "HKLM:\SOFTWARE\WVD" -Force
+        New-Item -Path $_.Path -Force
+    }
+
+    New-ItemProperty -Path $_.Path -Name $_.Name -Value $_.Value -PropertyType $_.PropertyType -Force -Verbose
 }
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "MajorVersion" -Value 2 -PropertyType DWord -Force -Verbose
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "MinorVersion" -Value 0 -PropertyType DWord -Force -Verbose
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantId" -Value $TenantId -PropertyType String -Force -Verbose
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantName" -Value $TenantName -PropertyType String -Force -Verbose
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "TenantDirectory" -Value $TenantDirectory -PropertyType String -Force -Verbose
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName" -Value $HostPoolName -PropertyType String -Force -Verbose
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathFSLogixProfiles" -Value $FSLogixUNCPath -PropertyType String -Force -Verbose
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathMSIX" -Value $MSIXAppAttachUNCPath -PropertyType String -Force -Verbose
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathApps" -Value $AppsUNCPath -PropertyType String -Force -Verbose
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\WVD" -Name "DomainUserGroup" -Value "DLG_SEC_WVD_Users" -PropertyType String -Force -Verbose
-
-# Max Disconnection Time: 4 hours
-New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration" -Name "MaxDisconnectionTime" -Value 14400000 -PropertyType DWord -Force -Verbose
-# Max Idle Time: 4 hours
-New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration" -Name "MaxIdleTime" -Value 14400000 -PropertyType DWord -Force -Verbose
 
 Stop-Transcript

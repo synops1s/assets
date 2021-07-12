@@ -2,9 +2,8 @@ param(
     [String]$AESKey
 )
 
-Start-Transcript -Path "C:\WVD\WVD.Apps.log" -Force
-
-$AppsConfigFile = "X:\WVD.Apps.json"
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Apps.log") -Force
 
 $ErrorActionPreference = "Stop"
 
@@ -96,10 +95,12 @@ $AES.IV = Get-WVDAESIVFromRegistry
 
 $Credential = [PSCredential]::new((Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret2") -Force))
 
-$FilePathApps = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "FilePathApps"
+$FilePathApps = Join-Path -Path "\\$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPrimaryEndPoint")" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsShareName") -Verbose
 
 Remove-SmbMapping -RemotePath $FilePathApps -ErrorAction SilentlyContinue -Force
-New-PSDrive -Name "X" -PSProvider FileSystem -Root $FilePathApps -Credential $Credential
+New-PSDrive -Name (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName") -PSProvider FileSystem -Root $FilePathApps -Credential $Credential
+
+$AppsConfigFile = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsConfigFilePath")
 
 If($false -eq (Test-Path -Path $AppsConfigFile)) {
 
@@ -112,33 +113,38 @@ $Apps = @{}
 $AppsConfig = Get-Content -Path $AppsConfigFile -Raw | ConvertFrom-Json
 $AppsConfig.psobject.Properties | ForEach-Object { $Apps[$_.Name] = $_.Value }
  
-$HostPool = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName"
+$HostPoolName = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName")
     
-If([System.String]::IsNullOrEmpty($HostPool)) {
+If([System.String]::IsNullOrEmpty($HostPoolName)) {
 
     Write-Warning -Message "No host pool found in registry"
     return
 }
 
-If([System.String]::IsNullOrEmpty($Apps[$HostPool])) {
+If([System.String]::IsNullOrEmpty($Apps[$HostPoolName])) {
 
-    Write-Warning -Message "No apps registered for Host Pool '$($HostPool)'"
+    Write-Warning -Message "No apps registered for Host Pool '$($HostPoolName)'"
     return
 }
 
-$Apps[$HostPool].Split(";") | ForEach-Object {
+$Apps[$HostPoolName].Split(";") | ForEach-Object {
  
     $ApplicationName = $_
 
-    $BasePath = "C:\WVD.Repository\WVD.Apps.$($ApplicationName)"
+    $AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsRepositoryPath")
+    $AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsInstallPath")
+
+    $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "WVD.Apps.$($ApplicationName)"
     $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
-    $InstallPath = "C:\WVD.Apps\$($ApplicationName)"
+    $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
 
     New-Item -Path $BasePath -ItemType Directory -Force
 
     Start-Transcript -Path (Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).Transcript.log") -Force
 
-    Copy-Item -Path "X:\Packages\WVD.Apps.$($ApplicationName).*" -Destination $BasePath -ErrorAction Stop -Verbose
+    $PackagesFilePath = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPackagesFolder")
+
+    Copy-Item -Path "$PackagesFilePath\WVD.Apps.$($ApplicationName).*" -Destination $BasePath -ErrorAction Stop -Verbose
     
     Set-Location -Path $BasePath
 

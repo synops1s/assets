@@ -1,7 +1,8 @@
-Start-Transcript -Path "C:\WVD\WVD.Tasks.Cleanup.log" -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Tasks.Cleanup.log") -Force
 
 $Task = @"
-Start-Transcript -Path "C:\WVD\Tasks\WVD.Tasks.Cleanup.log" -Force
+Start-Transcript -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")\Tasks.Cleanup.log" -Force
 
 Start-Sleep -Seconds 30 -Verbose
 
@@ -18,10 +19,9 @@ Get-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Sta
 Stop-Transcript
 "@
 
-New-Item -Path "C:\WVD\Tasks" -ItemType Directory -Force
-$Task | Set-Content -Path "C:\WVD\Tasks\WVD.Tasks.Cleanup.ps1" -Force -Verbose
+$Task | Set-Content -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "TaskSchedulerPath")\WVD.Tasks.Cleanup.ps1" -Force -Verbose
 
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File C:\WVD\Tasks\WVD.Tasks.Cleanup.ps1"
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File $(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "TaskSchedulerPath")\WVD.Tasks.Cleanup.ps1"
 $Principal = New-ScheduledTaskPrincipal -GroupId "SYSTEM" -RunLevel Limited
 
 Register-ScheduledTask -TaskName "WVD-Cleanup" -TaskPath "WVD" -Action $Action -Principal $Principal -Verbose

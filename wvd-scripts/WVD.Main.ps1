@@ -1,24 +1,19 @@
 param(
-    [String]$SharePath,
-    [String]$TenantId,
-    [String]$TenantName,
-    [String]$TenantDirectory,
-    [String]$HostPoolName,
+    [String]$RegistryItemProperties,
     [String]$AESKey
 )
 
 Add-Type -AssemblyName System.Web
+
+$RegistryItemProperties =[System.Web.HttpUtility]::UrlDecode($RegistryItemProperties)
+$AESKey =[System.Web.HttpUtility]::UrlDecode($AESKey)
 
 Function Invoke-Script {
     
     param(
         [String]$FileName,
         [String]$FilePath = (Get-Location).Path,
-        [String]$SharePath,
-        [String]$TenantId,
-        [String]$TenantName,
-        [String]$TenantDirectory,
-        [String]$HostPoolName,
+        [String]$RegistryItemProperties,
         [String]$AESKey
     )
 
@@ -30,7 +25,7 @@ Function Invoke-Script {
 
     if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`" -FilePath `"$($FilePath)`" -SharePath `"$($SharePath)`" -TenantId `"$($TenantId)`" -TenantName `"$($TenantName)`" -TenantDirectory `"$($TenantDirectory)`" -HostPoolName `"$($HostPoolName)`" -AESKey `"$($AESKey)`"" -RedirectStandardError "C:\WVD\$($PSFileName).RSE.log" -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`" -FilePath `"$($FilePath)`" -RegistryItemProperties `"$($RegistryItemProperties)`" -AESKey `"$($AESKey)`"" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
     }
     else
     {
@@ -38,24 +33,25 @@ Function Invoke-Script {
     }
 }
 
-New-Item -Path "C:\WVD" -ItemType Directory -Force
-Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
+
+New-Item -Path $LogPath -ItemType Directory -Force
+
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Main.log") -Force
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
-Invoke-Script -FileName "WVD.Config.ps1" -SharePath $SharePath -TenantId $TenantId -TenantName $TenantName -TenantDirectory $TenantDirectory -HostPoolName $HostPoolName
+Invoke-Script -FileName "WVD.Config.ps1" -RegistryItemProperties $RegistryItemProperties
 Invoke-Script -FileName "WVD.ACL.ps1"
-Invoke-Script -FileName "WVD.Defender.ps1" -SharePath $SharePath
+Invoke-Script -FileName "WVD.Defender.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
 Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Config.ps1" -SharePath $SharePath
-Invoke-Script -FileName "WVD.SSO.ps1"
-Invoke-Script -FileName "WVD.SSO.Office.ps1" -TenantId $TenantId
-Invoke-Script -FileName "WVD.DeviceRegistration.ps1" -TenantId $TenantId -TenantName $TenantName
+Invoke-Script -FileName "WVD.FSLogix.Config.ps1"
+Invoke-Script -FileName "WVD.DeviceRegistration.ps1"
 Invoke-Script -FileName "WVD.Tasks.DeviceRegistration.ps1"
 Invoke-Script -FileName "WVD.Tasks.Cleanup.ps1"
 Invoke-Script -FileName "WVD.Registration.ps1"
-Invoke-Script -FileName "WVD.Apps.ps1" -AESKey ([System.Web.HttpUtility]::UrlDecode($AESKey))
+Invoke-Script -FileName "WVD.Apps.ps1" -AESKey $AESKey
 
 Start-ScheduledTask -TaskName "WVD-DeviceRegistration" -TaskPath "WVD" -Verbose
 Start-ScheduledTask -TaskName "WVD-Cleanup" -TaskPath "WVD" -Verbose
