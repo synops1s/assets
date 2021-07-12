@@ -10,6 +10,11 @@ Remove-Item -Path "C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptEx
 
 Get-Item -Path "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\*\Status\*" -ErrorAction SilentlyContinue | Sort-Object -Property LastWriteTime | Select-Object -SkipLast 1 | Remove-Item
 
+Remove-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Downloads\*" -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\WindowsAzure\Logs\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\*.log" -Recurse -ErrorAction SilentlyContinue
+
+Get-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Status\*" -ErrorAction SilentlyContinue | Sort-Object -Property LastWriteTime | Select-Object -SkipLast 1 | Remove-Item
+
 Stop-Transcript
 "@
 
