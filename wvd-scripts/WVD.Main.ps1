@@ -41,6 +41,8 @@ Function Invoke-Script {
 New-Item -Path "C:\WVD" -ItemType Directory -Force
 Start-Transcript -Path "C:\WVD\WVD.Main.log" -Force
 
+Set-TimeZone -Name "W. Europe Standard Time" -Verbose
+
 Invoke-Script -FileName "WVD.Config.ps1" -SharePath $SharePath -TenantId $TenantId -TenantName $TenantName -TenantDirectory $TenantDirectory -HostPoolName $HostPoolName
 Invoke-Script -FileName "WVD.ACL.ps1"
 Invoke-Script -FileName "WVD.Defender.ps1" -SharePath $SharePath
@@ -54,8 +56,6 @@ Invoke-Script -FileName "WVD.Tasks.DeviceRegistration.ps1"
 Invoke-Script -FileName "WVD.Tasks.Cleanup.ps1"
 Invoke-Script -FileName "WVD.Registration.ps1"
 Invoke-Script -FileName "WVD.Apps.ps1" -AESKey ([System.Web.HttpUtility]::UrlDecode($AESKey))
-
-Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
 Start-ScheduledTask -TaskName "WVD-DeviceRegistration" -TaskPath "WVD" -Verbose
 Start-ScheduledTask -TaskName "WVD-Cleanup" -TaskPath "WVD" -Verbose
