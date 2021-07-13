@@ -1,7 +1,9 @@
+$ErrorActionPreference = "Stop"
+
 $LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.FSLogix.Config.log") -Force
 
-$FSLogixUNCPath = Join-Path -Path "\\$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfilePrimaryEndPoint")" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfileShareName") -Verbose
+$FSLogixUNCPath = Join-Path -Path "\\$((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfilePrimaryEndPoint"))" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfileShareName") -Verbose
 
 # Add FSLogix Settings
 New-Item -Path HKLM:\Software\FSLogix -Name Profiles -Force -Verbose

@@ -1,8 +1,10 @@
+$ErrorActionPreference = "Stop"
+
 $LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Tasks.Cleanup.log") -Force
 
 $Task = @"
-Start-Transcript -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")\Tasks.Cleanup.log" -Force
+Start-Transcript -Path "$((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath"))\Tasks.Cleanup.log" -Force
 
 Start-Sleep -Seconds 30 -Verbose
 
@@ -19,9 +21,9 @@ Get-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Sta
 Stop-Transcript
 "@
 
-$Task | Set-Content -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath")\AVD.Tasks.Cleanup.ps1" -Force -Verbose
+$Task | Set-Content -Path "$((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath"))\AVD.Tasks.Cleanup.ps1" -Force -Verbose
 
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File $(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath")\AVD.Tasks.Cleanup.ps1"
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File $((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath"))\AVD.Tasks.Cleanup.ps1"
 $Principal = New-ScheduledTaskPrincipal -GroupId "SYSTEM" -RunLevel Limited
 
 Register-ScheduledTask -TaskName "AVD-Cleanup" -TaskPath "AVD" -Action $Action -Principal $Principal -Verbose

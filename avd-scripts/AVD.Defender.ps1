@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 $LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Defender.log") -Force
 

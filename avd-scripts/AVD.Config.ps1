@@ -5,10 +5,12 @@ param(
     [String]$HostPoolName
 )
 
+$ErrorActionPreference = "Stop"
+
 $LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Config.log") -Force
 
-$RegistryItemProperties = Get-Content -Path ".\AVD.RegistryItemProperties.json" | ConvertFrom-Json
+$RegistryItemProperties = Get-Content -Path "$((Get-Location).Path)\AVD.RegistryItemProperties.json" | ConvertFrom-Json
 $RegistryItemProperties = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($RegistryItemProperties)))
 
 $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "HostPoolName"; Value = $HostPoolName; PropertyType = "String"})
