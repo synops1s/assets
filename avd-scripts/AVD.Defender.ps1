@@ -1,7 +1,7 @@
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Defender.log") -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Defender.log") -Force
 
-$FSLogixUNCPath = Join-Path -Path "\\$((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "ProfilePrimaryEndPoint"))" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "ProfileShareName") -Verbose
+$FSLogixUNCPath = Join-Path -Path "\\$((Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfilePrimaryEndPoint"))" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ProfileShareName") -Verbose
 
 $ExclusionPaths = @(
     $FSLogixUNCPath

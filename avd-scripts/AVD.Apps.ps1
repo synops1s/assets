@@ -1,13 +1,16 @@
 param(
+
+    [Parameter(Mandatory=$True)]
+    [ValidateNotNullOrEmpty()]
     [String]$AESKey
 )
 
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Apps.log") -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Apps.log") -Force
 
 $ErrorActionPreference = "Stop"
 
-Function Get-WVDAESIVFromRegistry
+Function Get-AVDAESIVFromRegistry
 {
     param (
         [Parameter(Mandatory=$false)]
@@ -23,7 +26,7 @@ Function Get-WVDAESIVFromRegistry
     [System.Convert]::FromBase64String($AESIV)
 }
 
-Function Unprotect-WVDAESString {
+Function Unprotect-AVDAESString {
 
     param (
 
@@ -64,7 +67,7 @@ Function Unprotect-WVDAESString {
     [System.Text.Encoding]::UTF8.GetString($UB)
 }
 
-Function Unprotect-WVDSecret
+Function Unprotect-AVDSecret
 {
     param (
         [Parameter(Mandatory=$true)]
@@ -81,7 +84,7 @@ Function Unprotect-WVDSecret
         $Name
     )
 
-    Unprotect-WVDAESString -AesCryptoServiceProvider $AesCryptoServiceProvider -Base64String (Get-ItemPropertyValue -Path $Path -Name $Name -ErrorAction Stop) -FromBase64
+    Unprotect-AVDAESString -AesCryptoServiceProvider $AesCryptoServiceProvider -Base64String (Get-ItemPropertyValue -Path $Path -Name $Name -ErrorAction Stop) -FromBase64
 }
 
 Write-Host -Message "ComputerName = $($env:COMPUTERNAME)"
@@ -91,16 +94,16 @@ $AESKeyDS = [System.Management.Automation.PSSerializer]::Deserialize([System.Tex
 $AES = [System.Security.Cryptography.AesCryptoServiceProvider]::new()
 
 $AES.Key = $AESKeyDS
-$AES.IV = Get-WVDAESIVFromRegistry
+$AES.IV = Get-AVDAESIVFromRegistry
 
-$Credential = [PSCredential]::new((Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Unprotect-WVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret2") -Force))
+$Credential = [PSCredential]::new((Unprotect-AVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret1"), (ConvertTo-SecureString -AsPlainText -String (Unprotect-AVDSecret -AesCryptoServiceProvider $AES -Name "FilePathAppsSecret2") -Force))
 
-$FilePathApps = Join-Path -Path "\\$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPrimaryEndPoint")" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsShareName") -Verbose
+$FilePathApps = Join-Path -Path "\\$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPrimaryEndPoint")" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsShareName") -Verbose
 
 Remove-SmbMapping -RemotePath $FilePathApps -ErrorAction SilentlyContinue -Force
-New-PSDrive -Name (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName") -PSProvider FileSystem -Root $FilePathApps -Credential $Credential
+New-PSDrive -Name (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPSDriveName") -PSProvider FileSystem -Root $FilePathApps -Credential $Credential
 
-$AppsConfigFile = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsConfigFilePath")
+$AppsConfigFile = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsConfigFilePath")
 
 If($false -eq (Test-Path -Path $AppsConfigFile)) {
 
@@ -113,7 +116,7 @@ $Apps = @{}
 $AppsConfig = Get-Content -Path $AppsConfigFile -Raw | ConvertFrom-Json
 $AppsConfig.psobject.Properties | ForEach-Object { $Apps[$_.Name] = $_.Value }
  
-$HostPoolName = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "HostPoolName")
+$HostPoolName = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "HostPoolName")
     
 If([System.String]::IsNullOrEmpty($HostPoolName)) {
 
@@ -131,32 +134,32 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
  
     $ApplicationName = $_
 
-    $AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsRepositoryPath")
-    $AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsInstallPath")
+    $AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
+    $AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
 
-    $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "WVD.Apps.$($ApplicationName)"
+    $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
     $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
     $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
 
     New-Item -Path $BasePath -ItemType Directory -Force
 
-    Start-Transcript -Path (Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).Transcript.log") -Force
+    Start-Transcript -Path (Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).Transcript.log") -Force
 
-    $PackagesFilePath = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsPackagesFolder")
+    $PackagesFilePath = Join-Path -Path "$(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPSDriveName"):\" -ChildPath (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPackagesFolder")
 
-    Copy-Item -Path "$PackagesFilePath\WVD.Apps.$($ApplicationName).*" -Destination $BasePath -ErrorAction Stop -Verbose
+    Copy-Item -Path "$PackagesFilePath\AVD.Apps.$($ApplicationName).*" -Destination $BasePath -ErrorAction Stop -Verbose
     
     Set-Location -Path $BasePath
 
-    $ArchiveFilePath = Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).zip"
+    $ArchiveFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).zip"
     if($true -eq (Test-Path -Path $ArchiveFilePath))
     {
         Expand-Archive -Path $ArchiveFilePath -DestinationPath (Join-Path -Path $BasePath -ChildPath "Unpacked") -Force -Verbose
     }
 
-    $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).ps1"
-    $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).log"
-    $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "WVD.Apps.$($ApplicationName).RSE.log"
+    $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
+    $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
+    $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
     Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
 

@@ -1,19 +1,36 @@
 param(
-    [String]$RegistryItemProperties,
+
+    [Parameter(Mandatory=$True)]
+    [ValidateNotNullOrEmpty()]
+    [String]$HostPoolName,
+
+    [Parameter(Mandatory=$True)]
+    [ValidateNotNullOrEmpty()]
     [String]$AESKey
 )
 
 Add-Type -AssemblyName System.Web
 
-$RegistryItemProperties =[System.Web.HttpUtility]::UrlDecode($RegistryItemProperties)
-$AESKey =[System.Web.HttpUtility]::UrlDecode($AESKey)
+$HostPoolName = [System.Web.HttpUtility]::UrlDecode($HostPoolName)
+$AESKey = [System.Web.HttpUtility]::UrlDecode($AESKey)
 
 Function Invoke-Script {
     
     param(
+
+        [Parameter(Mandatory=$True)]
+        [ValidateNotNullOrEmpty()]
         [String]$FileName,
+
+        [Parameter(Mandatory=$False)]
         [String]$FilePath = (Get-Location).Path,
-        [String]$RegistryItemProperties,
+
+        [Parameter(Mandatory=$False)]
+        [ValidateNotNullOrEmpty()]
+        [String]$HostPoolName,
+
+        [Parameter(Mandatory=$False)]
+        [ValidateNotNullOrEmpty()]
         [String]$AESKey
     )
 
@@ -22,7 +39,7 @@ Function Invoke-Script {
 
     if($True -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`" -FilePath `"$($FilePath)`" -RegistryItemProperties `"$($RegistryItemProperties)`" -AESKey `"$($AESKey)`"" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`" -FilePath `"$($FilePath)`" -HostPoolName `"$($HostPoolName)`" -AESKey `"$($AESKey)`"" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
     }
     else
     {
@@ -30,27 +47,27 @@ Function Invoke-Script {
     }
 }
 
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
 
 New-Item -Path $LogPath -ItemType Directory -Force
 
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Main.log") -Force
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Main.log") -Force
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
-Invoke-Script -FileName "WVD.Config.ps1" -RegistryItemProperties $RegistryItemProperties
-Invoke-Script -FileName "WVD.ACL.ps1"
-Invoke-Script -FileName "WVD.Defender.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Unpack.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Install.ps1"
-Invoke-Script -FileName "WVD.FSLogix.Config.ps1"
-Invoke-Script -FileName "WVD.DeviceRegistration.ps1"
-Invoke-Script -FileName "WVD.Tasks.DeviceRegistration.ps1"
-Invoke-Script -FileName "WVD.Tasks.Cleanup.ps1"
-Invoke-Script -FileName "WVD.Registration.ps1"
-Invoke-Script -FileName "WVD.Apps.ps1" -AESKey $AESKey
+Invoke-Script -FileName "AVD.Config.ps1" -HostPoolName $HostPoolName
+Invoke-Script -FileName "AVD.ACL.ps1"
+Invoke-Script -FileName "AVD.Defender.ps1"
+Invoke-Script -FileName "AVD.FSLogix.Unpack.ps1"
+Invoke-Script -FileName "AVD.FSLogix.Install.ps1"
+Invoke-Script -FileName "AVD.FSLogix.Config.ps1"
+Invoke-Script -FileName "AVD.DeviceRegistration.ps1"
+Invoke-Script -FileName "AVD.Tasks.DeviceRegistration.ps1"
+Invoke-Script -FileName "AVD.Tasks.Cleanup.ps1"
+Invoke-Script -FileName "AVD.Registration.ps1"
+Invoke-Script -FileName "AVD.Apps.ps1" -AESKey $AESKey
 
-Start-ScheduledTask -TaskName "WVD-DeviceRegistration" -TaskPath "WVD" -Verbose
-Start-ScheduledTask -TaskName "WVD-Cleanup" -TaskPath "WVD" -Verbose
+Start-ScheduledTask -TaskName "AVD-DeviceRegistration" -TaskPath "AVD" -Verbose
+Start-ScheduledTask -TaskName "AVD-Cleanup" -TaskPath "AVD" -Verbose
 
 Stop-Transcript

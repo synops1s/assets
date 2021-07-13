@@ -1,11 +1,17 @@
 param(
-    [String]$RegistryItemProperties
+
+    [Parameter(Mandatory=$True)]
+    [ValidateNotNullOrEmpty()]
+    [String]$HostPoolName
 )
 
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.Config.log") -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Config.log") -Force
 
+$RegistryItemProperties = Get-Content -Path ".\AVD.RegistryItemProperties.json" | ConvertFrom-Json
 $RegistryItemProperties = [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($RegistryItemProperties)))
+
+$RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "HostPoolName"; Value = $HostPoolName; PropertyType = "String"})
 
 $RegistryItemProperties | ForEach-Object {
 

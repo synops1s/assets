@@ -1,5 +1,5 @@
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.DeviceRegistration.log") -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.DeviceRegistration.log") -Force
 
 ### Just trigger the Automatic-Device-Join task which will set the (userCertificate) Attribute in AD (Which allows AAD Connect Filter to sync device to AAD) ###
 

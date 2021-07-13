@@ -1,5 +1,5 @@
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "LogPath")
-Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "WVD.ACL.log") -Force
+$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.ACL.log") -Force
 
 $ACL1 = [System.Security.AccessControl.FileSystemAccessRule]::new("NT AUTHORITY\SYSTEM","FullControl","ContainerInherit, Objectinherit","None","Allow")
 $ACL2 = [System.Security.AccessControl.FileSystemAccessRule]::new("BUILTIN\Administrators","FullControl","ContainerInherit, Objectinherit","None","Allow")
@@ -26,7 +26,7 @@ $ACL.AddAccessRule($ACL1)
 $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
-$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "TaskSchedulerPath")
+$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath")
 New-Item -Path $Path -ItemType Directory -Force
 $ACL = $null
 $ACL = Get-Acl -Path $Path
@@ -46,7 +46,7 @@ $ACL.AddAccessRule($ACL1)
 $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
-$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsRepositoryPath")
+$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
 New-Item -Path $Path -ItemType Directory -Force
 $ACL = $null
 $ACL = Get-Acl -Path $Path
@@ -56,7 +56,7 @@ $ACL.AddAccessRule($ACL1)
 $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
-$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WVD" -Name "AppsInstallPath")
+$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
 New-Item -Path $Path -ItemType Directory -Force
 $ACL = $null
 $ACL = Get-Acl -Path $Path
