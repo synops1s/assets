@@ -47,13 +47,20 @@ Function Invoke-Script {
     }
 }
 
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+$LogPath = "C:\AVD\Logs"
 
 New-Item -Path $LogPath -ItemType Directory -Force
 
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Main.log") -Force
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
+
+If($false -eq (Test-Path -Path "HKLM:\SOFTWARE\AVD")) {
+
+    New-Item -Path "HKLM:\SOFTWARE\AVD" -Force
+}
+
+New-ItemProperty -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath" -Value $LogPath -PropertyType "String" -Force -Verbose
 
 Invoke-Script -FileName "AVD.Config.ps1" -HostPoolName $HostPoolName
 Invoke-Script -FileName "AVD.ACL.ps1"
