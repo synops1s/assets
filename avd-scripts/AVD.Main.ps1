@@ -25,19 +25,25 @@ Function Invoke-Script {
         [String]$FilePath = (Get-Location).Path
     )
 
-    $ParameterString = [System.Text.StringBuilder]::new()
-
-    $Parameters.GetEnumerator() | ForEach-Object {
-
-        $ParameterString.Append("-$($_.Name) `"$($_.Value)`" ")
-    }
-
     $PSFilePath = Join-Path -Path $FilePath -ChildPath $FileName 
     $PSFileName = [System.IO.Path]::GetFileNameWithoutExtension($PSFilePath)
 
-    if($True -eq [System.IO.File]::Exists($PSFilePath))
+    if($true -eq [System.IO.File]::Exists($PSFilePath))
     {
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`"", "$($ParameterString)" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
+        if($null -ne $Parameters) {
+
+            $ParameterString = [System.Text.StringBuilder]::new()
+            $Parameters.GetEnumerator() | ForEach-Object {
+
+                $ParameterString.Append("-$($_.Name) `"$($_.Value)`" ")
+            }
+
+            Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`"", "$($ParameterString)" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
+        }
+        else {
+            
+            Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass", "-File `"$($PSFilePath)`"" -RedirectStandardError (Join-Path -Path $LogPath -ChildPath "$($PSFileName).RSE.log") -Wait -Verbose
+        }
     }
     else
     {
