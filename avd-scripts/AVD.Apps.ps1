@@ -162,7 +162,7 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     {
         $ImagePath = "C:\AVD.Apps\Images"
         $MountPath = "C:\AVD.Apps\Mounts\$($ApplicationName)"
-        $ImageDestinationFilePath = Join-FilePath -Path $ImagePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
+        $ImageDestinationFilePath = Join-Path -Path $ImagePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
 
         New-Item -Path $ImagePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
         New-Item -Path $MountPath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
