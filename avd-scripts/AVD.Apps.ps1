@@ -154,14 +154,36 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     $ArchiveFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).zip"
     if($true -eq (Test-Path -Path $ArchiveFilePath))
     {
-        Expand-Archive -Path $ArchiveFilePath -DestinationPath (Join-Path -Path $BasePath -ChildPath "Unpacked") -Force -Verbose
+        Expand-Archive -Path $ArchiveFilePath -DestinationPath $UnpackPath -Force -Verbose
+    }
+
+    $ImageSourceFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
+    if($true -eq (Test-Path -Path $ImageSourceFilePath))
+    {
+        $ImagePath = "C:\AVD.Apps\Images"
+        $MountPath = "C:\AVD.Apps\Mounts\$($ApplicationName)"
+        $ImageDestinationFilePath = Join-FilePath -Path $ImagePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
+
+        New-Item -Path $ImagePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
+        New-Item -Path $MountPath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
+        
+        Move-Item -Path $ImageSourceFilePath -Destination $ImageDestinationFilePath -Verbose
+        
+        Mount-DiskImage -ImagePath $ImageDestinationFilePath -NoDriveLetter -Access ReadOnly -StorageType VHDX -Verbose
+        $Disk = Get-DiskImage -ImagePath $ImageDestinationFilePath
+        $Partition = Get-Partition -DiskNumber $Disk.Number | Where-Object { $_.Type -eq "Basic" }
+        
+        Add-PartitionAccessPath -DiskNumber $Disk.Number -PartitionNumber $Partition.PartitionNumber -AccessPath $MountPath -Verbose
     }
 
     $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
-    $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
-    $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
+    if($true -eq (Test-Path -Path $ScriptFilePath))
+    {
+        $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
+        $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
-    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
+    }
 
     Stop-Transcript
 }
