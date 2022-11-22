@@ -140,6 +140,8 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
     $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
     $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
+    $ImagePath = "C:\AVD.Apps\Images"
+    $MountPath = "C:\AVD.Apps\Mounts\$($ApplicationName)"
 
     New-Item -Path $BasePath -ItemType Directory -Force
 
@@ -160,8 +162,6 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     $ImageSourceFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
     if($true -eq (Test-Path -Path $ImageSourceFilePath))
     {
-        $ImagePath = "C:\AVD.Apps\Images"
-        $MountPath = "C:\AVD.Apps\Mounts\$($ApplicationName)"
         $ImageDestinationFilePath = Join-Path -Path $ImagePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
 
         New-Item -Path $ImagePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
@@ -186,7 +186,7 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
         $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
         $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)", "-MountPath $($MountPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
     }
 
     Stop-Transcript
