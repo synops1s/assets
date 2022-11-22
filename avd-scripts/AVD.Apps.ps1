@@ -168,6 +168,10 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
         New-Item -Path $MountPath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
         
         Move-Item -Path $ImageSourceFilePath -Destination $ImageDestinationFilePath -Verbose
+
+        $Permission = Get-Acl -Path $ImageDestinationFilePath
+        $Permission.SetAccessRuleProtection($False, $True)
+        Set-Acl -Path $ImageDestinationFilePath -AclObject $Permission
         
         Mount-DiskImage -ImagePath $ImageDestinationFilePath -NoDriveLetter -Access ReadOnly -StorageType VHDX -Verbose
         $Disk = Get-DiskImage -ImagePath $ImageDestinationFilePath
