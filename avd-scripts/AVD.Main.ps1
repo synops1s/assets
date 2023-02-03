@@ -79,11 +79,10 @@ Invoke-Script -FileName "AVD.Defender.ps1"
 Invoke-Script -FileName "AVD.FSLogix.Unpack.ps1"
 Invoke-Script -FileName "AVD.FSLogix.Install.ps1"
 Invoke-Script -FileName "AVD.FSLogix.Config.ps1"
+Invoke-Script -FileName "AVD.Tasks.ps1"
 Invoke-Script -FileName "AVD.DeviceRegistration.ps1"
-Invoke-Script -FileName "AVD.Tasks.DeviceRegistration.ps1"
-Invoke-Script -FileName "AVD.Tasks.Cleanup.ps1"
-Invoke-Script -FileName "AVD.Registration.ps1"
 Invoke-Script -FileName "AVD.Apps.ps1" -Parameters @{ AESKey = $AESKey }
+Invoke-Script -FileName "AVD.Registration.ps1"
 
 Start-ScheduledTask -TaskName "AVD-DeviceRegistration" -TaskPath "AVD" -Verbose
 Start-ScheduledTask -TaskName "AVD-Cleanup" -TaskPath "AVD" -Verbose

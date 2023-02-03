@@ -84,8 +84,13 @@ Function Unprotect-AVDSecret
 
 $ErrorActionPreference = "Stop"
 
-$LogPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath")
+$LogPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath" -ErrorAction Stop
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Apps.log") -Force
+
+$ImagesPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ImagesPath" -ErrorAction Stop
+$MountsPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "MountsPath" -ErrorAction Stop
+$AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
+$AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
 
 Write-Host -Message "ComputerName = $($env:COMPUTERNAME)"
 
@@ -134,14 +139,8 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
  
     $ApplicationName = $_
 
-    $AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
-    $AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
-
     $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
     $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
-    $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
-    $ImagePath = "C:\AVD.Apps\Images"
-    $MountPath = "C:\AVD.Apps\Mounts\$($ApplicationName)"
 
     New-Item -Path $BasePath -ItemType Directory -Force
 
@@ -162,34 +161,38 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     $ImageSourceFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
     if($true -eq (Test-Path -Path $ImageSourceFilePath))
     {
-        $ImageDestinationFilePath = Join-Path -Path $ImagePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
+        $ImageDestinationFilePath = Join-Path -Path $ImagesPath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
 
-        New-Item -Path $ImagePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
-        New-Item -Path $MountPath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
-        
+        New-Item -Path $ImagesPath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose      
         Move-Item -Path $ImageSourceFilePath -Destination $ImageDestinationFilePath -Verbose
 
         $Permission = Get-Acl -Path $ImageDestinationFilePath
         $Permission.SetAccessRuleProtection($False, $True)
         Set-Acl -Path $ImageDestinationFilePath -AclObject $Permission
-        
-        Mount-DiskImage -ImagePath $ImageDestinationFilePath -NoDriveLetter -Access ReadOnly -StorageType VHDX -Verbose
-        $Disk = Get-DiskImage -ImagePath $ImageDestinationFilePath
-        $Partition = Get-Partition -DiskNumber $Disk.Number | Where-Object { $_.Type -eq "Basic" }
-        
-        Add-PartitionAccessPath -DiskNumber $Disk.Number -PartitionNumber $Partition.PartitionNumber -AccessPath $MountPath -Verbose
     }
 
+    Stop-Transcript
+}
+
+Start-ScheduledTask -TaskName "AVD-MountImages" -TaskPath "AVD" -Verbose
+
+$Apps[$HostPoolName].Split(";") | ForEach-Object {
+ 
+    $ApplicationName = $_
+
+    $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
+    $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
+    $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
+    $MountFilePath = "$($MountsPath)\$($ApplicationName)"
+    
     $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
     if($true -eq (Test-Path -Path $ScriptFilePath))
     {
         $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
         $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)", "-MountPath $($MountPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)", "-MountPath $($MountFilePath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
     }
-
-    Stop-Transcript
 }
 
 Stop-Transcript
