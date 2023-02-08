@@ -71,12 +71,12 @@ $MountImagesTask = [PSCustomObject]@{
 
             New-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
 
-            Dismount-DiskImage -ImagePath `$ImageDestinationFilePath -StorageType VHDX -Verbose -ErrorAction SilentlyContinue
+            Dismount-DiskImage -ImagePath `$ImageDestinationFilePath -StorageType VHDX -ErrorAction SilentlyContinue -Verbose
             Mount-DiskImage -ImagePath `$ImageDestinationFilePath -NoDriveLetter -Access ReadOnly -StorageType VHDX -Verbose
             `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
             `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
             
-            Remove-PartitionAccessPath -DiskNumber `$Disk.Number `$Partition.PartitionNumber -AccessPath `$MountFilePath -Verbose
+            Remove-PartitionAccessPath -DiskNumber `$Disk.Number `$Partition.PartitionNumber -AccessPath `$MountFilePath -ErrorAction SilentlyContinue -Verbose
             Add-PartitionAccessPath -DiskNumber `$Disk.Number -PartitionNumber `$Partition.PartitionNumber -AccessPath `$MountFilePath -Verbose
         }
 
@@ -87,7 +87,7 @@ $MountImagesTask = [PSCustomObject]@{
 }
 
 $Tasks = @(
-    # $DefenderUpdateTask
+    $DefenderUpdateTask
     $DeviceRegistrationTask
     $CleanupTask
     $MountImagesTask
