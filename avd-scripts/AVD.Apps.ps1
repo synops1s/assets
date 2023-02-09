@@ -174,7 +174,23 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     Stop-Transcript
 }
 
-Start-ScheduledTask -TaskName "AVD-MountImages" -TaskPath "AVD" -Verbose
+$TaskName = "AVD-MountImages"
+
+Start-ScheduledTask -TaskName $TaskName -TaskPath "AVD" -Verbose
+
+$Timeout = 60 
+$Timer = [Diagnostics.Stopwatch]::StartNew()
+
+while (((Get-ScheduledTask -TaskName "AVD-MountImages").State -ne 'Ready') -and ($Timer.Elapsed.TotalSeconds -lt $Timeout)) {    
+
+  Write-Verbose -Message "Waiting on scheduled task..."
+
+  Start-Sleep -Seconds  3   
+}
+
+$Timer.Stop()
+
+Write-Verbose -Message "Waited [$($Timer.Elapsed.TotalSeconds)] seconds on the task '$($TaskName)'"
 
 $Apps[$HostPoolName].Split(";") | ForEach-Object {
  
