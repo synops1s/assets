@@ -41,14 +41,14 @@ $CleanupTask = [PSCustomObject]@{
 
         Remove-Item -Path "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\*\Downloads\*" -Recurse -ErrorAction SilentlyContinue
         Remove-Item -Path "C:\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\*\*.log" -Recurse -ErrorAction SilentlyContinue
-        
+
         Get-Item -Path "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\*\Status\*" -ErrorAction SilentlyContinue | Sort-Object -Property LastWriteTime | Select-Object -SkipLast 1 | Remove-Item
-        
+
         Remove-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Downloads\*" -Recurse -ErrorAction SilentlyContinue
         Remove-Item -Path "C:\WindowsAzure\Logs\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\*.log" -Recurse -ErrorAction SilentlyContinue
-        
+
         Get-Item -Path "C:\Packages\Plugins\Microsoft.CPlat.Core.RunCommandWindows\*\Status\*" -ErrorAction SilentlyContinue | Sort-Object -Property LastWriteTime | Select-Object -SkipLast 1 | Remove-Item
-        
+
         Stop-Transcript
 "@
     Trigger = @()
@@ -69,14 +69,29 @@ $MountImagesTask = [PSCustomObject]@{
 
             `$MountFilePath = "$($MountsPath)\`$(`$ApplicationName)"
 
-            New-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
-
             Dismount-DiskImage -ImagePath `$ImageDestinationFilePath -StorageType VHDX -ErrorAction SilentlyContinue -Verbose
-            Mount-DiskImage -ImagePath `$ImageDestinationFilePath -NoDriveLetter -Access ReadOnly -StorageType VHDX -Verbose
+
             `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
             `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
             
             Remove-PartitionAccessPath -DiskNumber `$Disk.Number `$Partition.PartitionNumber -AccessPath `$MountFilePath -ErrorAction SilentlyContinue -Verbose
+            Remove-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
+        }
+
+        `$Images | ForEach-Object {
+            
+            `$ApplicationName = `$_.Name.Split(".")[2]
+            `$ImageDestinationFilePath = Join-Path -Path "$($ImagesPath)" -ChildPath "AVD.Apps.`$(`$ApplicationName).vhdx"
+
+            `$MountFilePath = "$($MountsPath)\`$(`$ApplicationName)"
+
+            New-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
+
+            Mount-DiskImage -ImagePath `$ImageDestinationFilePath -NoDriveLetter -Access ReadWrite -StorageType VHDX -Verbose
+
+            `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
+            `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
+            
             Add-PartitionAccessPath -DiskNumber `$Disk.Number -PartitionNumber `$Partition.PartitionNumber -AccessPath `$MountFilePath -Verbose
         }
 
