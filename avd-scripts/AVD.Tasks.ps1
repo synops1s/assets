@@ -71,11 +71,7 @@ $MountImagesTask = [PSCustomObject]@{
 
             Dismount-DiskImage -ImagePath `$ImageDestinationFilePath -StorageType VHDX -ErrorAction SilentlyContinue -Verbose
 
-            `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
-            `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
-            
-            Remove-PartitionAccessPath -DiskNumber `$Disk.Number `$Partition.PartitionNumber -AccessPath `$MountFilePath -ErrorAction SilentlyContinue -Verbose
-            Remove-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
+            Remove-Item -Path `$MountFilePath -ErrorAction SilentlyContinue -Force -Verbose
         }
 
         `$Images | ForEach-Object {
