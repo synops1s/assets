@@ -66,11 +66,25 @@ $MountImagesTask = [PSCustomObject]@{
             
             `$ApplicationName = `$_.Name.Split(".")[2]
             `$ImageDestinationFilePath = Join-Path -Path "$($ImagesPath)" -ChildPath "AVD.Apps.`$(`$ApplicationName).vhdx"
-
             `$MountFilePath = "$($MountsPath)\`$(`$ApplicationName)"
-
-            Dismount-DiskImage -ImagePath `$ImageDestinationFilePath -StorageType VHDX -ErrorAction SilentlyContinue -Verbose
-
+        
+            `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
+        
+            if(`$Disk.Number) {
+        
+                `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
+        
+                `$Partition.AccessPaths | ForEach-Object {
+        
+                    `$Partition | Remove-PartitionAccessPath -AccessPath `$_ -ErrorAction SilentlyContinue
+                }
+            }
+        
+            if(`$true -eq (Get-VHD -Path `$ImageDestinationFilePath).Attached) {
+        
+                Dismount-VHD -Path `$ImageDestinationFilePath -ErrorAction SilentlyContinue
+            }
+        
             Remove-Item -Path `$MountFilePath -ErrorAction SilentlyContinue -Force -Verbose
         }
 
@@ -78,17 +92,26 @@ $MountImagesTask = [PSCustomObject]@{
             
             `$ApplicationName = `$_.Name.Split(".")[2]
             `$ImageDestinationFilePath = Join-Path -Path "$($ImagesPath)" -ChildPath "AVD.Apps.`$(`$ApplicationName).vhdx"
-
             `$MountFilePath = "$($MountsPath)\`$(`$ApplicationName)"
-
+        
             New-Item -Path `$MountFilePath -ItemType Directory -ErrorAction SilentlyContinue -Force -Verbose
-
-            Mount-DiskImage -ImagePath `$ImageDestinationFilePath -NoDriveLetter -Access ReadWrite -StorageType VHDX -Verbose
-
-            `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
-            `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
+        
+            if(`$false -eq (Get-VHD -Path `$ImageDestinationFilePath).Attached) {
             
-            Add-PartitionAccessPath -DiskNumber `$Disk.Number -PartitionNumber `$Partition.PartitionNumber -AccessPath `$MountFilePath -Verbose
+                Mount-VHD -Path `$ImageDestinationFilePath -NoDriveLetter
+            }
+        
+            `$Disk = Get-DiskImage -ImagePath `$ImageDestinationFilePath
+            
+            if(`$null -ne `$Disk) {
+        
+                `$Partition = Get-Partition -DiskNumber `$Disk.Number | Where-Object { `$_.Type -eq "Basic" }
+                    
+                if(`$false -eq `$Partition.AccessPaths.Contains("`$(`$MountFilePath)\")) {
+        
+                    Add-PartitionAccessPath -DiskNumber `$Disk.Number -PartitionNumber `$Partition.PartitionNumber -AccessPath `$MountFilePath -Verbose
+                }
+            }
         }
 
         Stop-Transcript
