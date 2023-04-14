@@ -32,7 +32,6 @@ $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name 
 $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "LogPath"; Value = $LogPath; PropertyType = "String"})
 $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "TaskSchedulerPath"; Value = $TaskSchedulerPath; PropertyType = "String"})
 $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "AppsPath"; Value = $AppsPath; PropertyType = "String"})
-$RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "AppsPath"; Value = $AppsPath; PropertyType = "String"})
 $RegistryItemProperties.Add([pscustomobject]@{Path = "HKLM:\SOFTWARE\AVD"; Name = "AppsRepositoryPath"; Value = $AppsRepositoryPath; PropertyType = "String"})
 
 $RegistryItemProperties | ForEach-Object {
