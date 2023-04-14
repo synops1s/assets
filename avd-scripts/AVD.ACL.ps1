@@ -29,7 +29,6 @@ $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
 $Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath")
-New-Item -Path $Path -ItemType Directory -Force
 $ACL = $null
 $ACL = Get-Acl -Path $Path
 $ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
@@ -49,7 +48,6 @@ $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
 $Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
-New-Item -Path $Path -ItemType Directory -Force
 $ACL = $null
 $ACL = Get-Acl -Path $Path
 $ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }
@@ -58,8 +56,7 @@ $ACL.AddAccessRule($ACL1)
 $ACL.AddAccessRule($ACL2)
 $ACL | Set-Acl -Verbose
 
-$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
-New-Item -Path $Path -ItemType Directory -Force
+$Path = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPath")
 $ACL = $null
 $ACL = Get-Acl -Path $Path
 $ACL.Access | ForEach-Object { $ACL.RemoveAccessRule($_) }

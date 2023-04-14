@@ -51,20 +51,17 @@ Function Invoke-Script {
     }
 }
 
-$LogPath = "C:\AVD\Logs"
+$LogPath = "C:\AVD.Logs"
+$TaskSchedulerPath = "C:\AVD.Tasks"
+$AppsPath = "C:\AVD.Apps"
+$AppsRepositoryPath = "C:\AVD.Repository"
 
 New-Item -Path $LogPath -ItemType Directory -Force
+New-Item -Path $TaskSchedulerPath -ItemType Directory -Force
+New-Item -Path $AppsPath -ItemType Directory -Force
+New-Item -Path $AppsRepositoryPath -ItemType Directory -Force
 
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Main.log") -Force
-
-If($false -eq (Test-Path -Path "HKLM:\SOFTWARE\AVD")) {
-
-    New-Item -Path "HKLM:\SOFTWARE\AVD" -Force
-}
-
-New-ItemProperty -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath" -Value $LogPath -PropertyType "String" -Force -Verbose
-
-#######
 
 Add-Type -AssemblyName System.Web
 
@@ -73,7 +70,7 @@ $AESKey = [System.Web.HttpUtility]::UrlDecode($AESKey)
 
 Set-TimeZone -Name "W. Europe Standard Time" -Verbose
 
-Invoke-Script -FileName "AVD.Config.ps1" -Parameters @{ HostPoolName = $HostPoolName }
+Invoke-Script -FileName "AVD.Config.ps1" -Parameters @{ HostPoolName = $HostPoolName; LogPath = $LogPath; TaskSchedulerPath = $TaskSchedulerPath; AppsPath = $AppsPath; AppsRepositoryPath = $AppsRepositoryPath }
 Invoke-Script -FileName "AVD.ACL.ps1"
 Invoke-Script -FileName "AVD.Defender.ps1"
 Invoke-Script -FileName "AVD.FSLogix.Unpack.ps1"

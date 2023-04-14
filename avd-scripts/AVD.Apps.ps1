@@ -87,10 +87,10 @@ $ErrorActionPreference = "Stop"
 $LogPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath" -ErrorAction Stop
 Start-Transcript -Path (Join-Path -Path $LogPath -ChildPath "AVD.Apps.log") -Force
 
-$ImagesPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ImagesPath" -ErrorAction Stop
-$MountsPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "MountsPath" -ErrorAction Stop
+$AppsPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPath")
+$ImagesPath = Join-Path -Path $AppsPath -ChildPath "Images"
+$MountsPath = Join-Path -Path $AppsPath -ChildPath "Mounts"
 $AppsRepositoryPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsRepositoryPath")
-$AppsInstallPath = (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsInstallPath")
 
 Write-Host -Message "ComputerName = $($env:COMPUTERNAME)"
 
@@ -140,7 +140,6 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     $ApplicationName = $_
 
     $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
-    $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
 
     New-Item -Path $BasePath -ItemType Directory -Force
 
@@ -151,12 +150,6 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     Copy-Item -Path "$($PackagesFilePath)\AVD.Apps.$($ApplicationName).*" -Destination $BasePath -ErrorAction Stop -Verbose
     
     Set-Location -Path $BasePath
-
-    $ArchiveFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).zip"
-    if($true -eq (Test-Path -Path $ArchiveFilePath))
-    {
-        Expand-Archive -Path $ArchiveFilePath -DestinationPath $UnpackPath -Force -Verbose
-    }
 
     $ImageSourceFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).vhdx"
     if($true -eq (Test-Path -Path $ImageSourceFilePath))
@@ -198,10 +191,8 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
  
     $ApplicationName = $_
 
-    $BasePath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
-    $UnpackPath = Join-Path -Path $BasePath -ChildPath "Unpacked"
-    $InstallPath = Join-Path -Path $AppsInstallPath -ChildPath $ApplicationName
-    $MountFilePath = "$($MountsPath)\$($ApplicationName)"
+    $Path = Join-Path $MountsPath -ChildPath $ApplicationName
+    $RepositoryPath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
     
     $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
     if($true -eq (Test-Path -Path $ScriptFilePath))
@@ -209,7 +200,7 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
         $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
         $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-BasePath $($BasePath)", "-InstallPath $($InstallPath)", "-UnpackPath $($UnpackPath)", "-MountPath $($MountFilePath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-ApplicationName $($ApplicationName)", "-Path $($Path)", "-RepositoryPath $($RepositoryPath)", "-LogPath $($LogPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
     }
 }
 

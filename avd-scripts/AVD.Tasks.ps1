@@ -1,7 +1,9 @@
 $LogPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "LogPath" -ErrorAction Stop
-$ImagesPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "ImagesPath" -ErrorAction Stop
-$MountsPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "MountsPath" -ErrorAction Stop
+$AppsPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "AppsPath" -ErrorAction Stop
 $TaskSchedulerPath = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\AVD" -Name "TaskSchedulerPath" -ErrorAction Stop
+
+$ImagesPath = Join-Path -Path $AppsPath -ChildPath "Images"
+$MountsPath = Join-Path -Path $AppsPath -ChildPath "Mounts"
 
 $DefenderUpdateTask = [PSCustomObject]@{
     
