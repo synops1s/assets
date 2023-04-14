@@ -193,8 +193,8 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
 
     $Path = Join-Path $MountsPath -ChildPath $ApplicationName
     $RepositoryPath = Join-Path -Path $AppsRepositoryPath -ChildPath "AVD.Apps.$($ApplicationName)"
+    $ScriptFilePath = Join-Path -Path $RepositoryPath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
     
-    $ScriptFilePath = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).ps1"
     if($true -eq (Test-Path -Path $ScriptFilePath))
     {
         $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
