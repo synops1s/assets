@@ -197,8 +197,8 @@ $Apps[$HostPoolName].Split(";") | ForEach-Object {
     
     if($true -eq (Test-Path -Path $ScriptFilePath))
     {
-        $ScriptFilePathOut = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).log"
-        $ScriptFilePathErrors = Join-Path -Path $BasePath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
+        $ScriptFilePathOut = Join-Path -Path $RepositoryPath -ChildPath "AVD.Apps.$($ApplicationName).log"
+        $ScriptFilePathErrors = Join-Path -Path $RepositoryPath -ChildPath "AVD.Apps.$($ApplicationName).RSE.log"
 
         Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Unrestricted", "-File $($ScriptFilePath)", "-ApplicationName $($ApplicationName)", "-Path $($Path)", "-RepositoryPath $($RepositoryPath)", "-LogPath $($LogPath)" -RedirectStandardOutput $ScriptFilePathOut -RedirectStandardError $ScriptFilePathErrors -NoNewWindow -Wait -Verbose
     }
